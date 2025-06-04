@@ -4,7 +4,7 @@
   <meta charset="UTF-8" />
   <title>Activity Plan Worksheet</title>
 
-  <!-- Load docx v8.2.2 UMD bundle so window.docx is defined -->
+  <!-- Make sure we load the correct UMD bundle so window.docx exists -->
   <script src="https://unpkg.com/docx@8.2.2/build/index.umd.js"></script>
 
   <style>
@@ -13,10 +13,15 @@
       margin: 2rem;
       background-color: #f9f9f9;
     }
+    h1 {
+      font-size: 28px;
+      margin-bottom: 1rem;
+    }
     h2 {
       background-color: #e0e0e0;
       padding: 0.5rem;
       border-radius: 8px;
+      margin-top: 2rem;
     }
     .activity-section {
       border: 1px solid #ccc;
@@ -37,9 +42,10 @@
       border-radius: 8px;
       box-sizing: border-box;
       margin-bottom: 1rem;
+      font-size: 14px;
     }
     textarea {
-      height: 4rem;
+      height: 3rem;
     }
     button {
       padding: 0.6rem 1.2rem;
@@ -65,7 +71,7 @@
   <button onclick="downloadWord()">Download as Word Document</button>
 
   <script>
-    // 1) Map of subject → topic options
+    // 1) The mapping of each Subject → possible Topic Areas
     const activityOptions = {
       "ADST": [
         "Applied Design Process",
@@ -175,7 +181,7 @@
       ]
     };
 
-    // 2) Build one “Activity” section in the HTML form
+    // 2) Build one “Activity” section in the browser form
     function createActivitySection(index) {
       return `
         <div class="activity-section">
@@ -195,26 +201,25 @@
           <label for="vocabulary${index}">Vocabulary to model:</label>
           <textarea id="vocabulary${index}" placeholder="Click or tap here to enter text."></textarea>
 
-          <!-- These next fields are in the template but not filled via the form; leave them blank placeholders -->
-          <label>Student Communication Systems:</label>
-          <textarea id="commSystems${index}" placeholder="Choose an item.&#10;Choose an item.&#10;Choose an item.&#10;Other: Click or tap here to enter text." rows="4"></textarea>
+          <label for="commSystems${index}">Student Communication Systems:</label>
+          <textarea id="commSystems${index}" placeholder="(Choose an item.)&#10;(Choose an item.)&#10;(Choose an item.)&#10;Other: Click or tap here to enter text." rows="3"></textarea>
 
-          <label>Involving peers:</label>
-          <textarea id="peers${index}" placeholder="Location:&#10;☐ Classroom&#10;☐ Hallway&#10;☐ Other: Click or tap here to enter text."></textarea>
+          <label for="peers${index}">Involving peers:</label>
+          <textarea id="peers${index}" placeholder="Location:&#10;☐ Classroom&#10;☐ Hallway&#10;☐ Other: Click or tap here to enter text." rows="4"></textarea>
 
           <label for="studentsAsk${index}">Students to ask:</label>
           <input type="text" id="studentsAsk${index}" placeholder="Click or tap here to enter text.">
 
-          <label>Instructions</label>
-          <textarea id="instructions${index}" placeholder="Click or tap here to enter text."></textarea>
+          <label for="instructions${index}">Instructions</label>
+          <textarea id="instructions${index}" placeholder="Click or tap here to enter text." rows="3"></textarea>
 
-          <label>Variations</label>
-          <textarea id="variations${index}" placeholder="Click or tap here to enter text."></textarea>
+          <label for="variations${index}">Variations</label>
+          <textarea id="variations${index}" placeholder="Click or tap here to enter text." rows="3"></textarea>
         </div>
       `;
     }
 
-    // 3) When the subject dropdown changes, populate all topic dropdowns
+    // 3) When the “Subject Area” changes, populate each Activity’s “Topic” dropdown
     function updateAllTopics() {
       const subject = document.getElementById("globalSubject").value;
       for (let i = 0; i < 5; i++) {
@@ -231,7 +236,7 @@
       }
     }
 
-    // 4) Populate the “Subject Area” dropdown, then inject 5 activity sections
+    // 4) Inject the “Subject” dropdown and all five Activity sections into the page
     const globalSubject = document.getElementById("globalSubject");
     Object.keys(activityOptions).forEach(subject => {
       const opt = document.createElement("option");
@@ -246,194 +251,314 @@
       container.innerHTML += createActivitySection(i);
     }
 
-    // 5) downloadWord(): Generate a .docx that matches "Activity Plan Worksheet 1.docx"
+    // 5) This function builds a .docx with *exactly* the same 3-column tables
+    //    and placeholders as your “Activity Plan Worksheet 1.docx” template.
     function downloadWord() {
-      const { Document, Packer, Paragraph, TextRun } = window.docx;
+      const { Document, Packer, Paragraph, TextRun, Table, TableRow, TableCell, WidthType, VerticalAlign, AlignmentType } = window.docx;
 
-      // Title
-      const children = [];
-      children.push(
-        new Paragraph({
-          children: [
-            new TextRun({ text: "Activity Plan", bold: true, size: 32 })
-          ]
-        })
-      );
-      children.push(new Paragraph("")); // blank line
-
-      // Loop over 5 activities
-      for (let i = 0; i < 5; i++) {
-        // Activity header
-        children.push(
-          new Paragraph({
-            children: [
-              new TextRun({ text: `Activity ${i + 1}`, bold: true, size: 28 })
-            ]
-          })
-        );
-
-        // Topic Area
-        const topic = document.getElementById(`topic${i}`).value;
-        children.push(
-          new Paragraph({
-            children: [
-              new TextRun({ text: "Topic Area: ", bold: true }),
-              new TextRun(topic || "")
-            ]
-          })
-        );
-
-        // Activity Name
-        const activityName = document.getElementById(`activityName${i}`).value;
-        children.push(
-          new Paragraph({
-            children: [
-              new TextRun({ text: "Activity Name: ", bold: true }),
-              new TextRun(activityName || "Click or tap here to enter text.")
-            ]
-          })
-        );
-
-        // Considerations heading
-        children.push(
-          new Paragraph({
-            children: [
-              new TextRun({ text: "Considerations", bold: true, size: 24 })
-            ]
-          })
-        );
-
-        // Materials/Resources Needed
-        const materials = document.getElementById(`materials${i}`).value;
-        children.push(
-          new Paragraph({
-            children: [
-              new TextRun({ text: "Materials/Resources Needed:", bold: true })
-            ]
-          })
-        );
-        children.push(
-          new Paragraph(materials || "Click or tap here to enter text.")
-        );
-        children.push(new Paragraph("")); // blank line
-
-        // Vocabulary to model
-        const vocabulary = document.getElementById(`vocabulary${i}`).value;
-        children.push(
-          new Paragraph({
-            children: [
-              new TextRun({ text: "Vocabulary to model:", bold: true })
-            ]
-          })
-        );
-        children.push(
-          new Paragraph(vocabulary || "Click or tap here to enter text.")
-        );
-        children.push(new Paragraph("")); // blank line
-
-        // Student Communication Systems
-        const commSystems = document.getElementById(`commSystems${i}`).value;
-        children.push(
-          new Paragraph({
-            children: [
-              new TextRun({ text: "Student Communication Systems:", bold: true })
-            ]
-          })
-        );
-        // If user filled in a custom textarea, use that text; otherwise show placeholders
-        const commText = commSystems
-          ? commSystems
-          : "Choose an item.\nChoose an item.\nChoose an item.\nOther: Click or tap here to enter text.";
-        commText.split("\n").forEach(line => {
-          children.push(new Paragraph(line));
-        });
-        children.push(new Paragraph("")); // blank line
-
-        // Involving peers
-        const peers = document.getElementById(`peers${i}`).value;
-        children.push(
-          new Paragraph({
-            children: [
-              new TextRun({ text: "Involving peers:", bold: true })
-            ]
-          })
-        );
-        const peersText = peers
-          ? peers
-          : "Location:\n☐ Classroom\n☐ Hallway\n☐ Other: Click or tap here to enter text.";
-        peersText.split("\n").forEach(line => {
-          children.push(new Paragraph(line));
-        });
-        children.push(new Paragraph("")); // blank line
-
-        // Students to ask
-        const studentsAsk = document.getElementById(`studentsAsk${i}`).value;
-        children.push(
-          new Paragraph({
-            children: [
-              new TextRun({ text: "Students to ask:", bold: true }),
-              new TextRun(studentsAsk || "Click or tap here to enter text.")
-            ]
-          })
-        );
-        children.push(new Paragraph("")); // blank line
-
-        // Activity Information heading
-        children.push(
-          new Paragraph({
-            children: [
-              new TextRun({ text: "Activity Information", bold: true, size: 24 })
-            ]
-          })
-        );
-        children.push(new Paragraph("")); // blank line
-
-        // Instructions
-        const instructions = document.getElementById(`instructions${i}`).value;
-        children.push(
-          new Paragraph({
-            children: [
-              new TextRun({ text: "Instructions", bold: true })
-            ]
-          })
-        );
-        children.push(
-          new Paragraph(instructions || "Click or tap here to enter text.")
-        );
-        children.push(new Paragraph("")); // blank line
-
-        // Variations
-        const variations = document.getElementById(`variations${i}`).value;
-        children.push(
-          new Paragraph({
-            children: [
-              new TextRun({ text: "Variations", bold: true })
-            ]
-          })
-        );
-        children.push(
-          new Paragraph(variations || "Click or tap here to enter text.")
-        );
-
-        // Add extra spacing before next activity
-        children.push(new Paragraph(""));
-        children.push(new Paragraph(""));
-      }
-
-      // Build document and trigger download
       const doc = new Document({
         sections: [
           {
-            children,
             properties: {
               page: {
                 margin: { top: 1000, right: 1000, bottom: 1000, left: 1000 }
               }
-            }
+            },
+            children: []
           }
         ]
       });
 
+      const rootChildren = doc.sections[0].children;
+
+      // 5.a) Add the Title “Activity Plan” in Heading2 style (size 32, bold, centered)
+      const title = new Paragraph({
+        children: [ new TextRun({ text: "Activity Plan", bold: true, size: 32 }) ],
+        alignment: AlignmentType.CENTER
+      });
+      rootChildren.push(title);
+      rootChildren.push(new Paragraph("")); // one blank line
+
+      // 5.b) For each of the 5 activities, create a 9×3 table
+      for (let i = 0; i < 5; i++) {
+        const activityIndex = i + 1;
+        const topicValue = document.getElementById(`topic${i}`).value.trim();
+        const activityNameValue = document.getElementById(`activityName${i}`).value.trim();
+        const materialsValue = document.getElementById(`materials${i}`).value.trim();
+        const vocabularyValue = document.getElementById(`vocabulary${i}`).value.trim();
+        const commSystemsValue = document.getElementById(`commSystems${i}`).value.trim();
+        const peersValue = document.getElementById(`peers${i}`).value.trim();
+        const studentsAskValue = document.getElementById(`studentsAsk${i}`).value.trim();
+        const instructionsValue = document.getElementById(`instructions${i}`).value.trim();
+        const variationsValue = document.getElementById(`variations${i}`).value.trim();
+
+        // Create a 9-row, 3-column table
+        const table = doc.createTable(9, 3);
+        table.setWidth(WidthType.DXA, 9072); // total page width minus 1" margins left/right
+
+        // Helper to center text vertically inside each cell
+        function setAllCellVerticalAlign(row, align) {
+          row.cells.forEach(cell => {
+            cell.properties.setVerticalAlign(VerticalAlign.CENTER);
+          });
+        }
+
+        // Row 0: “Activity X” in bold, size 28, centered horizontally & vertically
+        const row0 = table.getRow(0);
+        setAllCellVerticalAlign(row0, VerticalAlign.CENTER);
+        row0.cells.forEach(cell => {
+          cell.clear(); // remove any default empty paragraph
+          cell.addParagraph(
+            new Paragraph({
+              children: [ new TextRun({ text: `Activity ${activityIndex}`, bold: true, size: 28 }) ],
+              alignment: AlignmentType.CENTER
+            })
+          );
+        });
+
+        // Row 1: “Topic Area: [user topic]”
+        const row1 = table.getRow(1);
+        setAllCellVerticalAlign(row1, VerticalAlign.CENTER);
+        row1.cells.forEach(cell => {
+          cell.clear();
+          cell.addParagraph(
+            new Paragraph({
+              children: [
+                new TextRun({ text: "Topic Area: ", bold: true }),
+                new TextRun(topicValue || "")
+              ]
+            })
+          );
+        });
+
+        // Row 2: “Activity Name: [user name]”
+        const row2 = table.getRow(2);
+        setAllCellVerticalAlign(row2, VerticalAlign.CENTER);
+        row2.cells.forEach(cell => {
+          cell.clear();
+          cell.addParagraph(
+            new Paragraph({
+              children: [
+                new TextRun({ text: "Activity Name: ", bold: true }),
+                new TextRun(activityNameValue || "")
+              ]
+            })
+          );
+        });
+
+        // Row 3: “Considerations” (bold, centered)
+        const row3 = table.getRow(3);
+        setAllCellVerticalAlign(row3, VerticalAlign.CENTER);
+        row3.cells.forEach(cell => {
+          cell.clear();
+          cell.addParagraph(
+            new Paragraph({
+              children: [ new TextRun({ text: "Considerations", bold: true, size: 24 }) ],
+              alignment: AlignmentType.CENTER
+            })
+          );
+        });
+
+        // Row 4:
+        //   - col0 & col1: “Materials/Resources Needed:”
+        //   - col2: “Vocabulary to model:”
+        const row4 = table.getRow(4);
+        setAllCellVerticalAlign(row4, VerticalAlign.TOP);
+
+        // col0
+        row4.cells[0].clear();
+        row4.cells[0].addParagraph(
+          new Paragraph({ children: [ new TextRun({ text: "Materials/Resources Needed:", bold: true }) ] })
+        );
+        if (materialsValue) {
+          row4.cells[0].addParagraph(new Paragraph(materialsValue));
+        } else {
+          // leave ~3 blank lines for handwriting
+          row4.cells[0].addParagraph(new Paragraph(""));
+          row4.cells[0].addParagraph(new Paragraph(""));
+          row4.cells[0].addParagraph(new Paragraph(""));
+        }
+
+        // col1 (identical to col0’s label, no user text here)
+        row4.cells[1].clear();
+        row4.cells[1].addParagraph(
+          new Paragraph({ children: [ new TextRun({ text: "Materials/Resources Needed:", bold: true }) ] })
+        );
+        // no user text in this column—just blank
+        row4.cells[1].addParagraph(new Paragraph(""));
+        row4.cells[1].addParagraph(new Paragraph(""));
+        row4.cells[1].addParagraph(new Paragraph(""));
+
+        // col2
+        row4.cells[2].clear();
+        row4.cells[2].addParagraph(
+          new Paragraph({ children: [ new TextRun({ text: "Vocabulary to model:", bold: true }) ] })
+        );
+        if (vocabularyValue) {
+          row4.cells[2].addParagraph(new Paragraph(vocabularyValue));
+        } else {
+          row4.cells[2].addParagraph(new Paragraph(""));
+          row4.cells[2].addParagraph(new Paragraph(""));
+          row4.cells[2].addParagraph(new Paragraph(""));
+        }
+
+        // Row 5:
+        //   - col0 & col1: “Student Communication Systems:” + “Other:”
+        //   - col2: “Involving peers:” + checkboxes + “Students to ask:”
+        const row5 = table.getRow(5);
+        setAllCellVerticalAlign(row5, VerticalAlign.TOP);
+
+        // col0
+        row5.cells[0].clear();
+        row5.cells[0].addParagraph(
+          new Paragraph({ children: [ new TextRun({ text: "Student Communication Systems:", bold: true }) ] })
+        );
+        row5.cells[0].addParagraph(new Paragraph({ children: [ new TextRun({ text: "Other:", bold: true }) ] }));
+        if (commSystemsValue) {
+          // if user provided text, put it here
+          commSystemsValue.split("\n").forEach(line => {
+            row5.cells[0].addParagraph(new Paragraph(line));
+          });
+        } else {
+          // leave a couple blank lines
+          row5.cells[0].addParagraph(new Paragraph(""));
+          row5.cells[0].addParagraph(new Paragraph(""));
+        }
+
+        // col1 (same as col0)
+        row5.cells[1].clear();
+        row5.cells[1].addParagraph(
+          new Paragraph({ children: [ new TextRun({ text: "Student Communication Systems:", bold: true }) ] })
+        );
+        row5.cells[1].addParagraph(new Paragraph({ children: [ new TextRun({ text: "Other:", bold: true }) ] }));
+        row5.cells[1].addParagraph(new Paragraph(""));
+        row5.cells[1].addParagraph(new Paragraph(""));
+
+        // col2
+        row5.cells[2].clear();
+        // “Involving peers:” line
+        row5.cells[2].addParagraph(
+          new Paragraph({ children: [ new TextRun({ text: "Involving peers:", bold: true }) ] })
+        );
+        // “Location:” line with checkboxes
+        const locationPara = new Paragraph();
+        locationPara.addRun(new TextRun("Location:"));
+        row5.cells[2].addParagraph(locationPara);
+
+        // ☐ Classroom
+        const classroomPara = new Paragraph();
+        classroomPara.addRun(new TextRun("\u2610 Classroom")); // Unicode ballot box
+        row5.cells[2].addParagraph(classroomPara);
+
+        // ☐ Hallway
+        const hallwayPara = new Paragraph();
+        hallwayPara.addRun(new TextRun("\u2610 Hallway"));
+        row5.cells[2].addParagraph(hallwayPara);
+
+        // ☐ Other:
+        const otherPara = new Paragraph();
+        otherPara.addRun(new TextRun("\u2610 Other:"));
+        row5.cells[2].addParagraph(otherPara);
+
+        // blank line
+        row5.cells[2].addParagraph(new Paragraph(""));
+
+        // “Students to ask:”
+        const askPara = new Paragraph();
+        askPara.addRun(new TextRun({ text: "Students to ask:", bold: true }));
+        row5.cells[2].addParagraph(askPara);
+        if (studentsAskValue) {
+          row5.cells[2].addParagraph(new Paragraph(studentsAskValue));
+        } else {
+          row5.cells[2].addParagraph(new Paragraph(""));
+        }
+
+        // Row 6: “Activity Information” (centered, bold, size 24)
+        const row6 = table.getRow(6);
+        setAllCellVerticalAlign(row6, VerticalAlign.CENTER);
+        row6.cells.forEach(cell => {
+          cell.clear();
+          cell.addParagraph(
+            new Paragraph({
+              children: [ new TextRun({ text: "Activity Information", bold: true, size: 24 }) ],
+              alignment: AlignmentType.CENTER
+            })
+          );
+        });
+
+        // Row 7:
+        //   - col0: “Instructions” + blank lines / user text
+        //   - col1 & col2: just blank lines
+        const row7 = table.getRow(7);
+        setAllCellVerticalAlign(row7, VerticalAlign.TOP);
+
+        // col0
+        row7.cells[0].clear();
+        row7.cells[0].addParagraph(
+          new Paragraph({ children: [ new TextRun({ text: "Instructions", bold: true }) ] })
+        );
+        if (instructionsValue) {
+          instructionsValue.split("\n").forEach(line => {
+            row7.cells[0].addParagraph(new Paragraph(line));
+          });
+        } else {
+          row7.cells[0].addParagraph(new Paragraph(""));
+          row7.cells[0].addParagraph(new Paragraph(""));
+          row7.cells[0].addParagraph(new Paragraph(""));
+        }
+
+        // col1 (blank)
+        row7.cells[1].clear();
+        row7.cells[1].addParagraph(new Paragraph(""));
+        row7.cells[1].addParagraph(new Paragraph(""));
+        row7.cells[1].addParagraph(new Paragraph(""));
+
+        // col2 (blank)
+        row7.cells[2].clear();
+        row7.cells[2].addParagraph(new Paragraph(""));
+        row7.cells[2].addParagraph(new Paragraph(""));
+        row7.cells[2].addParagraph(new Paragraph(""));
+
+        // Row 8:
+        //   - col0: “Variations” + blank / user text
+        //   - col1 & col2: just blank
+        const row8 = table.getRow(8);
+        setAllCellVerticalAlign(row8, VerticalAlign.TOP);
+
+        // col0
+        row8.cells[0].clear();
+        row8.cells[0].addParagraph(
+          new Paragraph({ children: [ new TextRun({ text: "Variations", bold: true }) ] })
+        );
+        if (variationsValue) {
+          variationsValue.split("\n").forEach(line => {
+            row8.cells[0].addParagraph(new Paragraph(line));
+          });
+        } else {
+          row8.cells[0].addParagraph(new Paragraph(""));
+          row8.cells[0].addParagraph(new Paragraph(""));
+          row8.cells[0].addParagraph(new Paragraph(""));
+        }
+
+        // col1 (blank)
+        row8.cells[1].clear();
+        row8.cells[1].addParagraph(new Paragraph(""));
+        row8.cells[1].addParagraph(new Paragraph(""));
+        row8.cells[1].addParagraph(new Paragraph(""));
+
+        // col2 (blank)
+        row8.cells[2].clear();
+        row8.cells[2].addParagraph(new Paragraph(""));
+        row8.cells[2].addParagraph(new Paragraph(""));
+        row8.cells[2].addParagraph(new Paragraph(""));
+
+        // After each table, insert two blank paragraphs as spacing
+        rootChildren.push(table);
+        rootChildren.push(new Paragraph(""));
+        rootChildren.push(new Paragraph(""));
+      }
+
+      // Finally, bundle the document and trigger download
       Packer.toBlob(doc).then(blob => {
         const link = document.createElement("a");
         link.href = URL.createObjectURL(blob);
