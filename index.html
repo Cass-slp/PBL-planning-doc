@@ -3,7 +3,8 @@
 <head>
   <meta charset="UTF-8" />
   <title>Activity Plan Worksheet</title>
-    <!-- 1. Use the UMD, browser-ready file under dist/, not build/index.umd.js -->
+
+  <!-- Load docx v8.2.2 UMD bundle so window.docx is defined -->
   <script src="https://unpkg.com/docx@8.2.2/build/index.umd.js"></script>
 
   <style>
@@ -64,115 +65,117 @@
   <button onclick="downloadWord()">Download as Word Document</button>
 
   <script>
+    // 1) Map of subject → topic options
     const activityOptions = {
-  "ADST": [
-    "Applied Design Process",
-    "Computational Thinking and Digital Literacy",
-    "Media Arts/Digital Creation",
-    "Food Studies",
-    "Textiles",
-    "Woodwork/Construction/Maker Activities",
-    "Robotics and Engineering",
-    "Entrepreneurship"
-  ],
-  "Language Arts": [
-    "Phonemic Awareness and Phonics",
-    "Reading Aloud",
-    "Retelling Stories",
-    "Making Predictions",
-    "Asking Questions",
-    "Summarizing",
-    "Creative Writing",
-    "Personal Writing",
-    "Informational Writing",
-    "Opinion/Argument Writing",
-    "Writing Process",
-    "Oral Storytelling",
-    "Sharing Ideas",
-    "Presentations",
-    "Listening Comprehension",
-    "Following Directions",
-    "High-Frequency Words and Sight Words",
-    "Spelling Patterns and Rules",
-    "Word Families and Rhyming Words",
-    "Prefixes, Suffixes, Root Words",
-    "Parts of Speech (nouns, verbs, adjectives)",
-    "Sentence Structure",
-    "Understanding and Creating Media Texts",
-    "Analyzing Messages and Audience",
-    "Evaluating Sources and Information"
-  ],
-  "Mathematics": [
-    "Counting and Number Recognition",
-    "Addition, Subtraction, Multiplication, Division",
-    "Identifying and Creating Patterns",
-    "Understanding Relationships and Functions",
-    "Measuring and Understanding Length/Width/Height (standard and non standard units)",
-    "Measuring and Understanding Time (clocks, calendars, elapsed time)",
-    "Measuring and Understanding Temperature",
-    "Measuring and Understanding Weight and Mass",
-    "Measuring and Understanding Volume and Capacity",
-    "2D and 3D Shapes",
-    "Sorting and Classifying",
-    "Collecting and Organizing Data",
-    "Real World Math Applications",
-    "Logical Reasoning",
-    "Understanding Money",
-    "Earning, Saving, Spending",
-    "Making Change",
-    "Budgeting Basics"
-  ],
-  "Physical Health Education": [
-    "Locomotor Skills (walking, running, skipping, leaping, sliding)",
-    "Non-Locomotor Skills (balancing, twisting, stretching, bending, swaying)",
-    "Manipulative Skills (catching, kicking, rolling)",
-    "Games and Cooperative Play",
-    "Rhythm and Dance",
-    "Fitness and Health",
-    "Outdoor and Adventure",
-    "Safety and Personal Responsibility"
-  ],
-  "Science": [
-    "Plants and Animals",
-    "Human Body",
-    "Ecosystems and Environments",
-    "Matter",
-    "Forces and Motion",
-    "Sound, Light, and Heat",
-    "Weather and Seasons",
-    "Rocks, Soil and Landforms",
-    "Water Cycle",
-    "Recycling and Waste",
-    "Space",
-    "Local Ecosystems",
-    "Asking Questions and Making Predictions",
-    "Designing and Conducting Experiments",
-    "Making Observations and Recording Data",
-    "Analyzing and Drawing Conclusions",
-    "Design and Build Challenges",
-    "Using Tools and Materials Safely"
-  ],
-  "Social Studies": [
-    "Identity, Culture and Community",
-    "Governance and Decision Making",
-    "Geography and Environment",
-    "Time Continuity and Change",
-    "Economy and Resources",
-    "Global and Cultural Connections",
-    "Indigenous Perspectives and Knowledge"
-  ],
-  "Life Skills": [
-    "Personal Care and Hygiene",
-    "Social and Communication Skills",
-    "Self Regulation and Coping Skills",
-    "Home and Daily Living Skills",
-    "Safety and Community Awareness",
-    "Time and Money Skills",
-    "Organization and Responsibility",
-    "Healthy Choices and Nutrition"
-  ]
-};
+      "ADST": [
+        "Applied Design Process",
+        "Computational Thinking and Digital Literacy",
+        "Media Arts/Digital Creation",
+        "Food Studies",
+        "Textiles",
+        "Woodwork/Construction/Maker Activities",
+        "Robotics and Engineering",
+        "Entrepreneurship"
+      ],
+      "Language Arts": [
+        "Phonemic Awareness and Phonics",
+        "Reading Aloud",
+        "Retelling Stories",
+        "Making Predictions",
+        "Asking Questions",
+        "Summarizing",
+        "Creative Writing",
+        "Personal Writing",
+        "Informational Writing",
+        "Opinion/Argument Writing",
+        "Writing Process",
+        "Oral Storytelling",
+        "Sharing Ideas",
+        "Presentations",
+        "Listening Comprehension",
+        "Following Directions",
+        "High-Frequency Words and Sight Words",
+        "Spelling Patterns and Rules",
+        "Word Families and Rhyming Words",
+        "Prefixes, Suffixes, Root Words",
+        "Parts of Speech (nouns, verbs, adjectives)",
+        "Sentence Structure",
+        "Understanding and Creating Media Texts",
+        "Analyzing Messages and Audience",
+        "Evaluating Sources and Information"
+      ],
+      "Mathematics": [
+        "Counting and Number Recognition",
+        "Addition, Subtraction, Multiplication, Division",
+        "Identifying and Creating Patterns",
+        "Understanding Relationships and Functions",
+        "Measuring and Understanding Length/Width/Height (standard and non standard units)",
+        "Measuring and Understanding Time (clocks, calendars, elapsed time)",
+        "Measuring and Understanding Temperature",
+        "Measuring and Understanding Weight and Mass",
+        "Measuring and Understanding Volume and Capacity",
+        "2D and 3D Shapes",
+        "Sorting and Classifying",
+        "Collecting and Organizing Data",
+        "Real World Math Applications",
+        "Logical Reasoning",
+        "Understanding Money",
+        "Earning, Saving, Spending",
+        "Making Change",
+        "Budgeting Basics"
+      ],
+      "Physical Health Education": [
+        "Locomotor Skills (walking, running, skipping, leaping, sliding)",
+        "Non-Locomotor Skills (balancing, twisting, stretching, bending, swaying)",
+        "Manipulative Skills (catching, kicking, rolling)",
+        "Games and Cooperative Play",
+        "Rhythm and Dance",
+        "Fitness and Health",
+        "Outdoor and Adventure",
+        "Safety and Personal Responsibility"
+      ],
+      "Science": [
+        "Plants and Animals",
+        "Human Body",
+        "Ecosystems and Environments",
+        "Matter",
+        "Forces and Motion",
+        "Sound, Light, and Heat",
+        "Weather and Seasons",
+        "Rocks, Soil and Landforms",
+        "Water Cycle",
+        "Recycling and Waste",
+        "Space",
+        "Local Ecosystems",
+        "Asking Questions and Making Predictions",
+        "Designing and Conducting Experiments",
+        "Making Observations and Recording Data",
+        "Analyzing and Drawing Conclusions",
+        "Design and Build Challenges",
+        "Using Tools and Materials Safely"
+      ],
+      "Social Studies": [
+        "Identity, Culture and Community",
+        "Governance and Decision Making",
+        "Geography and Environment",
+        "Time Continuity and Change",
+        "Economy and Resources",
+        "Global and Cultural Connections",
+        "Indigenous Perspectives and Knowledge"
+      ],
+      "Life Skills": [
+        "Personal Care and Hygiene",
+        "Social and Communication Skills",
+        "Self Regulation and Coping Skills",
+        "Home and Daily Living Skills",
+        "Safety and Community Awareness",
+        "Time and Money Skills",
+        "Organization and Responsibility",
+        "Healthy Choices and Nutrition"
+      ]
+    };
 
+    // 2) Build one “Activity” section in the HTML form
     function createActivitySection(index) {
       return `
         <div class="activity-section">
@@ -184,23 +187,34 @@
           </select>
 
           <label for="activityName${index}">Activity Name</label>
-          <input type="text" id="activityName${index}" placeholder="Enter activity name...">
+          <input type="text" id="activityName${index}" placeholder="Click or tap here to enter text.">
 
-          <label for="materials${index}">Materials/Resources</label>
-          <textarea id="materials${index}" placeholder="List materials..."></textarea>
+          <label for="materials${index}">Materials/Resources Needed:</label>
+          <textarea id="materials${index}" placeholder="Click or tap here to enter text."></textarea>
 
-          <label for="vocabulary${index}">Vocabulary</label>
-          <textarea id="vocabulary${index}" placeholder="Key vocabulary..."></textarea>
+          <label for="vocabulary${index}">Vocabulary to model:</label>
+          <textarea id="vocabulary${index}" placeholder="Click or tap here to enter text."></textarea>
 
-          <label for="instructions${index}">Instructions</label>
-          <textarea id="instructions${index}" placeholder="Describe the activity..."></textarea>
+          <!-- These next fields are in the template but not filled via the form; leave them blank placeholders -->
+          <label>Student Communication Systems:</label>
+          <textarea id="commSystems${index}" placeholder="Choose an item.&#10;Choose an item.&#10;Choose an item.&#10;Other: Click or tap here to enter text." rows="4"></textarea>
 
-          <label for="variations${index}">Variations</label>
-          <textarea id="variations${index}" placeholder="Any variations..."></textarea>
+          <label>Involving peers:</label>
+          <textarea id="peers${index}" placeholder="Location:&#10;☐ Classroom&#10;☐ Hallway&#10;☐ Other: Click or tap here to enter text."></textarea>
+
+          <label for="studentsAsk${index}">Students to ask:</label>
+          <input type="text" id="studentsAsk${index}" placeholder="Click or tap here to enter text.">
+
+          <label>Instructions</label>
+          <textarea id="instructions${index}" placeholder="Click or tap here to enter text."></textarea>
+
+          <label>Variations</label>
+          <textarea id="variations${index}" placeholder="Click or tap here to enter text."></textarea>
         </div>
       `;
     }
 
+    // 3) When the subject dropdown changes, populate all topic dropdowns
     function updateAllTopics() {
       const subject = document.getElementById("globalSubject").value;
       for (let i = 0; i < 5; i++) {
@@ -217,6 +231,7 @@
       }
     }
 
+    // 4) Populate the “Subject Area” dropdown, then inject 5 activity sections
     const globalSubject = document.getElementById("globalSubject");
     Object.keys(activityOptions).forEach(subject => {
       const opt = document.createElement("option");
@@ -231,35 +246,194 @@
       container.innerHTML += createActivitySection(i);
     }
 
+    // 5) downloadWord(): Generate a .docx that matches "Activity Plan Worksheet 1.docx"
     function downloadWord() {
       const { Document, Packer, Paragraph, TextRun } = window.docx;
 
-      const children = [
-        new Paragraph({ children: [ new TextRun({ text: "Activity Plan Worksheet", bold: true, size: 28 }) ] }),
-        new Paragraph("")
-      ];
+      // Title
+      const children = [];
+      children.push(
+        new Paragraph({
+          children: [
+            new TextRun({ text: "Activity Plan", bold: true, size: 32 })
+          ]
+        })
+      );
+      children.push(new Paragraph("")); // blank line
 
-      const subject = document.getElementById("globalSubject").value;
-      children.push(new Paragraph({ children: [ new TextRun({ text: "Subject Area: ", bold: true }), new TextRun(subject) ] }));
-
+      // Loop over 5 activities
       for (let i = 0; i < 5; i++) {
-        const topic = document.getElementById(`topic${i}`).value;
-        const activity = document.getElementById(`activityName${i}`).value;
-        const materials = document.getElementById(`materials${i}`).value;
-        const vocab = document.getElementById(`vocabulary${i}`).value;
-        const instructions = document.getElementById(`instructions${i}`).value;
-        const variations = document.getElementById(`variations${i}`).value;
+        // Activity header
+        children.push(
+          new Paragraph({
+            children: [
+              new TextRun({ text: `Activity ${i + 1}`, bold: true, size: 28 })
+            ]
+          })
+        );
 
-        children.push(new Paragraph({ children: [ new TextRun({ text: `\nActivity ${i + 1}`, bold: true, size: 24 }) ] }));
-        children.push(new Paragraph({ children: [ new TextRun({ text: "Topic Area: ", bold: true }), new TextRun(topic) ] }));
-        children.push(new Paragraph({ children: [ new TextRun({ text: "Activity Name: ", bold: true }), new TextRun(activity) ] }));
-        children.push(new Paragraph({ children: [ new TextRun({ text: "Materials/Resources: ", bold: true }), new TextRun(materials) ] }));
-        children.push(new Paragraph({ children: [ new TextRun({ text: "Vocabulary: ", bold: true }), new TextRun(vocab) ] }));
-        children.push(new Paragraph({ children: [ new TextRun({ text: "Instructions: ", bold: true }), new TextRun(instructions) ] }));
-        children.push(new Paragraph({ children: [ new TextRun({ text: "Variations: ", bold: true }), new TextRun(variations) ] }));
+        // Topic Area
+        const topic = document.getElementById(`topic${i}`).value;
+        children.push(
+          new Paragraph({
+            children: [
+              new TextRun({ text: "Topic Area: ", bold: true }),
+              new TextRun(topic || "")
+            ]
+          })
+        );
+
+        // Activity Name
+        const activityName = document.getElementById(`activityName${i}`).value;
+        children.push(
+          new Paragraph({
+            children: [
+              new TextRun({ text: "Activity Name: ", bold: true }),
+              new TextRun(activityName || "Click or tap here to enter text.")
+            ]
+          })
+        );
+
+        // Considerations heading
+        children.push(
+          new Paragraph({
+            children: [
+              new TextRun({ text: "Considerations", bold: true, size: 24 })
+            ]
+          })
+        );
+
+        // Materials/Resources Needed
+        const materials = document.getElementById(`materials${i}`).value;
+        children.push(
+          new Paragraph({
+            children: [
+              new TextRun({ text: "Materials/Resources Needed:", bold: true })
+            ]
+          })
+        );
+        children.push(
+          new Paragraph(materials || "Click or tap here to enter text.")
+        );
+        children.push(new Paragraph("")); // blank line
+
+        // Vocabulary to model
+        const vocabulary = document.getElementById(`vocabulary${i}`).value;
+        children.push(
+          new Paragraph({
+            children: [
+              new TextRun({ text: "Vocabulary to model:", bold: true })
+            ]
+          })
+        );
+        children.push(
+          new Paragraph(vocabulary || "Click or tap here to enter text.")
+        );
+        children.push(new Paragraph("")); // blank line
+
+        // Student Communication Systems
+        const commSystems = document.getElementById(`commSystems${i}`).value;
+        children.push(
+          new Paragraph({
+            children: [
+              new TextRun({ text: "Student Communication Systems:", bold: true })
+            ]
+          })
+        );
+        // If user filled in a custom textarea, use that text; otherwise show placeholders
+        const commText = commSystems
+          ? commSystems
+          : "Choose an item.\nChoose an item.\nChoose an item.\nOther: Click or tap here to enter text.";
+        commText.split("\n").forEach(line => {
+          children.push(new Paragraph(line));
+        });
+        children.push(new Paragraph("")); // blank line
+
+        // Involving peers
+        const peers = document.getElementById(`peers${i}`).value;
+        children.push(
+          new Paragraph({
+            children: [
+              new TextRun({ text: "Involving peers:", bold: true })
+            ]
+          })
+        );
+        const peersText = peers
+          ? peers
+          : "Location:\n☐ Classroom\n☐ Hallway\n☐ Other: Click or tap here to enter text.";
+        peersText.split("\n").forEach(line => {
+          children.push(new Paragraph(line));
+        });
+        children.push(new Paragraph("")); // blank line
+
+        // Students to ask
+        const studentsAsk = document.getElementById(`studentsAsk${i}`).value;
+        children.push(
+          new Paragraph({
+            children: [
+              new TextRun({ text: "Students to ask:", bold: true }),
+              new TextRun(studentsAsk || "Click or tap here to enter text.")
+            ]
+          })
+        );
+        children.push(new Paragraph("")); // blank line
+
+        // Activity Information heading
+        children.push(
+          new Paragraph({
+            children: [
+              new TextRun({ text: "Activity Information", bold: true, size: 24 })
+            ]
+          })
+        );
+        children.push(new Paragraph("")); // blank line
+
+        // Instructions
+        const instructions = document.getElementById(`instructions${i}`).value;
+        children.push(
+          new Paragraph({
+            children: [
+              new TextRun({ text: "Instructions", bold: true })
+            ]
+          })
+        );
+        children.push(
+          new Paragraph(instructions || "Click or tap here to enter text.")
+        );
+        children.push(new Paragraph("")); // blank line
+
+        // Variations
+        const variations = document.getElementById(`variations${i}`).value;
+        children.push(
+          new Paragraph({
+            children: [
+              new TextRun({ text: "Variations", bold: true })
+            ]
+          })
+        );
+        children.push(
+          new Paragraph(variations || "Click or tap here to enter text.")
+        );
+
+        // Add extra spacing before next activity
+        children.push(new Paragraph(""));
+        children.push(new Paragraph(""));
       }
 
-      const doc = new Document({ sections: [{ children }] });
+      // Build document and trigger download
+      const doc = new Document({
+        sections: [
+          {
+            children,
+            properties: {
+              page: {
+                margin: { top: 1000, right: 1000, bottom: 1000, left: 1000 }
+              }
+            }
+          }
+        ]
+      });
+
       Packer.toBlob(doc).then(blob => {
         const link = document.createElement("a");
         link.href = URL.createObjectURL(blob);
