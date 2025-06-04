@@ -1,65 +1,340 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Homepage</title>
+  <meta charset="UTF-8" />
+  <title>Activity Plan Worksheet</title>
+
+  <!-- 1) Point at the UMD build in 8.2.2 (unpkg or jsDelivr) -->
+  <script src="https://unpkg.com/docx@8.2.2/build/index.umd.js"></script>
+
   <style>
     body {
-      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-      background: linear-gradient(135deg, #e0f7fa, #80deea);
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      height: 100vh;
-      margin: 0;
+      font-family: Arial, sans-serif;
+      margin: 2rem;
+      background-color: #f9f9f9;
     }
-
-    h1 {
-      margin-bottom: 40px;
-      color: #004d40;
+    h2 {
+      background-color: #e0e0e0;
+      padding: 0.5rem;
+      border-radius: 8px;
     }
-
-    .button-container {
-      display: flex;
-      flex-direction: column;
-      gap: 20px;
+    .activity-section {
+      border: 1px solid #ccc;
+      padding: 1rem;
+      border-radius: 10px;
+      background-color: white;
+      margin-bottom: 2rem;
     }
-
-    .button {
-      padding: 15px 30px;
-      background-color: #00796b;
+    label {
+      display: block;
+      margin: 0.5rem 0 0.2rem;
+      font-weight: bold;
+    }
+    input[type="text"], select, textarea {
+      width: 100%;
+      padding: 0.4rem;
+      border: 1px solid #ccc;
+      border-radius: 8px;
+      box-sizing: border-box;
+      margin-bottom: 1rem;
+    }
+    textarea {
+      height: 4rem;
+    }
+    button {
+      padding: 0.6rem 1.2rem;
+      font-size: 1rem;
+      background-color: #4CAF50;
       color: white;
       border: none;
-      border-radius: 12px;
-      font-size: 18px;
+      border-radius: 6px;
       cursor: pointer;
-      transition: background-color 0.3s ease, transform 0.2s ease;
-      text-align: center;
-      text-decoration: none;
-      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
-    }
-
-    .button:hover {
-      background-color: #004d40;
-      transform: scale(1.05);
-    }
-
-    @media (max-width: 600px) {
-      .button {
-        width: 80vw;
-      }
+      margin-top: 1rem;
     }
   </style>
 </head>
 <body>
-  <h1>Welcome to My Homepage</h1>
-  <div class="button-container">
-    <a href="https://www.google.com" class="button" target="_blank">Google</a>
-    <a href="https://www.wikipedia.org" class="button" target="_blank">Wikipedia</a>
-    <a href="https://www.youtube.com" class="button" target="_blank">YouTube</a>
-    <a href="https://www.reddit.com" class="button" target="_blank">Reddit</a>
-  </div>
+  <h1>Activity Plan Worksheet</h1>
+
+  <label for="globalSubject">Subject Area (applies to all activities)</label>
+  <select id="globalSubject">
+    <option value="">-- Select Subject --</option>
+  </select>
+
+  <div id="formContainer"></div>
+  <button onclick="downloadWord()">Download as Word Document</button>
+
+  <script>
+    // 1) Activity‐to‐topic mapping (same as before)
+    const activityOptions = {
+      "ADST": [
+        "Applied Design Process",
+        "Computational Thinking and Digital Literacy",
+        "Media Arts/Digital Creation",
+        "Food Studies",
+        "Textiles",
+        "Woodwork/Construction/Maker Activities",
+        "Robotics and Engineering",
+        "Entrepreneurship"
+      ],
+      "Language Arts": [
+        "Phonemic Awareness and Phonics",
+        "Reading Aloud",
+        "Retelling Stories",
+        "Making Predictions",
+        "Asking Questions",
+        "Summarizing",
+        "Creative Writing",
+        "Personal Writing",
+        "Informational Writing",
+        "Opinion/Argument Writing",
+        "Writing Process",
+        "Oral Storytelling",
+        "Sharing Ideas",
+        "Presentations",
+        "Listening Comprehension",
+        "Following Directions",
+        "High-Frequency Words and Sight Words",
+        "Spelling Patterns and Rules",
+        "Word Families and Rhyming Words",
+        "Prefixes, Suffixes, Root Words",
+        "Parts of Speech (nouns, verbs, adjectives)",
+        "Sentence Structure",
+        "Understanding and Creating Media Texts",
+        "Analyzing Messages and Audience",
+        "Evaluating Sources and Information"
+      ],
+      "Mathematics": [
+        "Counting and Number Recognition",
+        "Addition, Subtraction, Multiplication, Division",
+        "Identifying and Creating Patterns",
+        "Understanding Relationships and Functions",
+        "Measuring and Understanding Length/Width/Height (standard and non standard units)",
+        "Measuring and Understanding Time (clocks, calendars, elapsed time)",
+        "Measuring and Understanding Temperature",
+        "Measuring and Understanding Weight and Mass",
+        "Measuring and Understanding Volume and Capacity",
+        "2D and 3D Shapes",
+        "Sorting and Classifying",
+        "Collecting and Organizing Data",
+        "Real World Math Applications",
+        "Logical Reasoning",
+        "Understanding Money",
+        "Earning, Saving, Spending",
+        "Making Change",
+        "Budgeting Basics"
+      ],
+      "Physical Health Education": [
+        "Locomotor Skills (walking, running, skipping, leaping, sliding)",
+        "Non-Locomotor Skills (balancing, twisting, stretching, bending, swaying)",
+        "Manipulative Skills (catching, kicking, rolling)",
+        "Games and Cooperative Play",
+        "Rhythm and Dance",
+        "Fitness and Health",
+        "Outdoor and Adventure",
+        "Safety and Personal Responsibility"
+      ],
+      "Science": [
+        "Plants and Animals",
+        "Human Body",
+        "Ecosystems and Environments",
+        "Matter",
+        "Forces and Motion",
+        "Sound, Light, and Heat",
+        "Weather and Seasons",
+        "Rocks, Soil and Landforms",
+        "Water Cycle",
+        "Recycling and Waste",
+        "Space",
+        "Local Ecosystems",
+        "Asking Questions and Making Predictions",
+        "Designing and Conducting Experiments",
+        "Making Observations and Recording Data",
+        "Analyzing and Drawing Conclusions",
+        "Design and Build Challenges",
+        "Using Tools and Materials Safely"
+      ],
+      "Social Studies": [
+        "Identity, Culture and Community",
+        "Governance and Decision Making",
+        "Geography and Environment",
+        "Time Continuity and Change",
+        "Economy and Resources",
+        "Global and Cultural Connections",
+        "Indigenous Perspectives and Knowledge"
+      ],
+      "Life Skills": [
+        "Personal Care and Hygiene",
+        "Social and Communication Skills",
+        "Self Regulation and Coping Skills",
+        "Home and Daily Living Skills",
+        "Safety and Community Awareness",
+        "Time and Money Skills",
+        "Organization and Responsibility",
+        "Healthy Choices and Nutrition"
+      ]
+    };
+
+    // 2) Build one “Activity” section at a time
+    function createActivitySection(index) {
+      return `
+        <div class="activity-section">
+          <h2>Activity ${index + 1}</h2>
+
+          <label for="topic${index}">Topic Area</label>
+          <select id="topic${index}">
+            <option value="">-- Select Topic --</option>
+          </select>
+
+          <label for="activityName${index}">Activity Name</label>
+          <input type="text" id="activityName${index}" placeholder="Enter activity name...">
+
+          <label for="materials${index}">Materials/Resources</label>
+          <textarea id="materials${index}" placeholder="List materials..."></textarea>
+
+          <label for="vocabulary${index}">Vocabulary</label>
+          <textarea id="vocabulary${index}" placeholder="Key vocabulary..."></textarea>
+
+          <label for="instructions${index}">Instructions</label>
+          <textarea id="instructions${index}" placeholder="Describe the activity..."></textarea>
+
+          <label for="variations${index}">Variations</label>
+          <textarea id="variations${index}" placeholder="Any variations..."></textarea>
+        </div>
+      `;
+    }
+
+    function updateAllTopics() {
+      const subject = document.getElementById("globalSubject").value;
+      for (let i = 0; i < 5; i++) {
+        const topicSelect = document.getElementById(`topic${i}`);
+        topicSelect.innerHTML = '<option value="">-- Select Topic --</option>';
+        if (activityOptions[subject]) {
+          activityOptions[subject].forEach(topic => {
+            const opt = document.createElement("option");
+            opt.value = topic;
+            opt.textContent = topic;
+            topicSelect.appendChild(opt);
+          });
+        }
+      }
+    }
+
+    // 3) Populate “Subject” dropdown and inject 5 activity sections
+    const globalSubject = document.getElementById("globalSubject");
+    Object.keys(activityOptions).forEach(subject => {
+      const opt = document.createElement("option");
+      opt.value = subject;
+      opt.textContent = subject;
+      globalSubject.appendChild(opt);
+    });
+    globalSubject.addEventListener("change", updateAllTopics);
+
+    const container = document.getElementById("formContainer");
+    for (let i = 0; i < 5; i++) {
+      container.innerHTML += createActivitySection(i);
+    }
+
+    // 4) This now works because window.docx is defined (thanks to the correct UMD)
+    function downloadWord() {
+      const { Document, Packer, Paragraph, TextRun } = window.docx;
+
+      const children = [
+        new Paragraph({
+          children: [
+            new TextRun({ text: "Activity Plan Worksheet", bold: true, size: 28 })
+          ]
+        }),
+        new Paragraph("")
+      ];
+
+      const subject = document.getElementById("globalSubject").value;
+      children.push(
+        new Paragraph({
+          children: [
+            new TextRun({ text: "Subject Area: ", bold: true }),
+            new TextRun(subject)
+          ]
+        })
+      );
+
+      for (let i = 0; i < 5; i++) {
+        const topic = document.getElementById(`topic${i}`).value;
+        const activity = document.getElementById(`activityName${i}`).value;
+        const materials = document.getElementById(`materials${i}`).value;
+        const vocab = document.getElementById(`vocabulary${i}`).value;
+        const instructions = document.getElementById(`instructions${i}`).value;
+        const variations = document.getElementById(`variations${i}`).value;
+
+        children.push(
+          new Paragraph({
+            children: [
+              new TextRun({
+                text: `\nActivity ${i + 1}`,
+                bold: true,
+                size: 24
+              })
+            ]
+          })
+        );
+        children.push(
+          new Paragraph({
+            children: [
+              new TextRun({ text: "Topic Area: ", bold: true }),
+              new TextRun(topic)
+            ]
+          })
+        );
+        children.push(
+          new Paragraph({
+            children: [
+              new TextRun({ text: "Activity Name: ", bold: true }),
+              new TextRun(activity)
+            ]
+          })
+        );
+        children.push(
+          new Paragraph({
+            children: [
+              new TextRun({ text: "Materials/Resources: ", bold: true }),
+              new TextRun(materials)
+            ]
+          })
+        );
+        children.push(
+          new Paragraph({
+            children: [
+              new TextRun({ text: "Vocabulary: ", bold: true }),
+              new TextRun(vocab)
+            ]
+          })
+        );
+        children.push(
+          new Paragraph({
+            children: [
+              new TextRun({ text: "Instructions: ", bold: true }),
+              new TextRun(instructions)
+            ]
+          })
+        );
+        children.push(
+          new Paragraph({
+            children: [
+              new TextRun({ text: "Variations: ", bold: true }),
+              new TextRun(variations)
+            ]
+          })
+        );
+      }
+
+      const doc = new Document({ sections: [{ children }] });
+      Packer.toBlob(doc).then(blob => {
+        const link = document.createElement("a");
+        link.href = URL.createObjectURL(blob);
+        link.download = "ActivityPlan.docx";
+        link.click();
+      });
+    }
+  </script>
 </body>
 </html>
