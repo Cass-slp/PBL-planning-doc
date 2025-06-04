@@ -4,8 +4,9 @@
   <meta charset="UTF-8" />
   <title>Activity Plan Worksheet</title>
 
-  <!-- 1) Point at the UMD build in 8.2.2 (unpkg or jsDelivr) -->
-  <script src="https://unpkg.com/docx@8.2.2/build/index.umd.js"></script>
+  <!-- 1. Use the UMD, browser-ready file under dist/, not build/index.umd.js -->
+<script src="https://cdn.jsdelivr.net/npm/docx@8.2.2/build/index.umd.js"></script>
+
 
   <style>
     body {
@@ -65,7 +66,7 @@
   <button onclick="downloadWord()">Download as Word Document</button>
 
   <script>
-    // 1) Activity‐to‐topic mapping (same as before)
+    // (1) Your activityOptions stays the same
     const activityOptions = {
       "ADST": [
         "Applied Design Process",
@@ -175,7 +176,7 @@
       ]
     };
 
-    // 2) Build one “Activity” section at a time
+    // (2) Functions to build the form
     function createActivitySection(index) {
       return `
         <div class="activity-section">
@@ -220,7 +221,7 @@
       }
     }
 
-    // 3) Populate “Subject” dropdown and inject 5 activity sections
+    // (3) Populate “Subject” dropdown and inject 5 activity sections
     const globalSubject = document.getElementById("globalSubject");
     Object.keys(activityOptions).forEach(subject => {
       const opt = document.createElement("option");
@@ -235,106 +236,93 @@
       container.innerHTML += createActivitySection(i);
     }
 
-    // 4) This now works because window.docx is defined (thanks to the correct UMD)
-    function downloadWord() {
-      const { Document, Packer, Paragraph, TextRun } = window.docx;
+    // (4) The downloadWord function now works because window.docx is defined
+  function downloadWord() {
+  const { Document, Packer, Paragraph, TextRun, HeadingLevel } = window.docx;
 
-      const children = [
-        new Paragraph({
-          children: [
-            new TextRun({ text: "Activity Plan Worksheet", bold: true, size: 28 })
-          ]
-        }),
-        new Paragraph("")
-      ];
+  const children = [];
 
-      const subject = document.getElementById("globalSubject").value;
+  // Title
+  children.push(
+    new Paragraph({
+      heading: HeadingLevel.HEADING_1,
+      children: [new TextRun({ text: "Activity Plan Worksheet", bold: true })],
+    })
+  );
+
+  // Subject Area
+  const subject = document.getElementById("globalSubject").value;
+  children.push(
+    new Paragraph({
+      spacing: { after: 200 },
+      children: [
+        new TextRun({ text: "Subject Area: ", bold: true }),
+        new TextRun(subject),
+      ],
+    })
+  );
+
+  for (let i = 0; i < 5; i++) {
+    const topic = document.getElementById(`topic${i}`).value;
+    const activity = document.getElementById(`activityName${i}`).value;
+    const materials = document.getElementById(`materials${i}`).value;
+    const vocab = document.getElementById(`vocabulary${i}`).value;
+    const instructions = document.getElementById(`instructions${i}`).value;
+    const variations = document.getElementById(`variations${i}`).value;
+
+    // Activity heading
+    children.push(
+      new Paragraph({
+        spacing: { before: 400, after: 200 },
+        heading: HeadingLevel.HEADING_2,
+        children: [
+          new TextRun({ text: `Activity ${i + 1}`, bold: true }),
+        ],
+      })
+    );
+
+    // Each field styled with label and value
+    const addSection = (label, value) => {
       children.push(
         new Paragraph({
+          spacing: { after: 100 },
           children: [
-            new TextRun({ text: "Subject Area: ", bold: true }),
-            new TextRun(subject)
-          ]
+            new TextRun({ text: `${label}: `, bold: true }),
+            new TextRun(value || " "),
+          ],
         })
       );
+    };
 
-      for (let i = 0; i < 5; i++) {
-        const topic = document.getElementById(`topic${i}`).value;
-        const activity = document.getElementById(`activityName${i}`).value;
-        const materials = document.getElementById(`materials${i}`).value;
-        const vocab = document.getElementById(`vocabulary${i}`).value;
-        const instructions = document.getElementById(`instructions${i}`).value;
-        const variations = document.getElementById(`variations${i}`).value;
+    addSection("Topic Area", topic);
+    addSection("Activity Name", activity);
+    addSection("Materials/Resources Needed", materials);
+    addSection("Vocabulary to Model", vocab);
+    addSection("Instructions", instructions);
+    addSection("Variations", variations);
+  }
 
-        children.push(
-          new Paragraph({
-            children: [
-              new TextRun({
-                text: `\nActivity ${i + 1}`,
-                bold: true,
-                size: 24
-              })
-            ]
-          })
-        );
-        children.push(
-          new Paragraph({
-            children: [
-              new TextRun({ text: "Topic Area: ", bold: true }),
-              new TextRun(topic)
-            ]
-          })
-        );
-        children.push(
-          new Paragraph({
-            children: [
-              new TextRun({ text: "Activity Name: ", bold: true }),
-              new TextRun(activity)
-            ]
-          })
-        );
-        children.push(
-          new Paragraph({
-            children: [
-              new TextRun({ text: "Materials/Resources: ", bold: true }),
-              new TextRun(materials)
-            ]
-          })
-        );
-        children.push(
-          new Paragraph({
-            children: [
-              new TextRun({ text: "Vocabulary: ", bold: true }),
-              new TextRun(vocab)
-            ]
-          })
-        );
-        children.push(
-          new Paragraph({
-            children: [
-              new TextRun({ text: "Instructions: ", bold: true }),
-              new TextRun(instructions)
-            ]
-          })
-        );
-        children.push(
-          new Paragraph({
-            children: [
-              new TextRun({ text: "Variations: ", bold: true }),
-              new TextRun(variations)
-            ]
-          })
-        );
-      }
+  const doc = new Document({
+    sections: [
+      {
+        properties: {
+          page: {
+            margin: { top: 720, bottom: 720, left: 720, right: 720 }, // 1 inch margins
+          },
+        },
+        children,
+      },
+    ],
+  });
 
-      const doc = new Document({ sections: [{ children }] });
-      Packer.toBlob(doc).then(blob => {
-        const link = document.createElement("a");
-        link.href = URL.createObjectURL(blob);
-        link.download = "ActivityPlan.docx";
-        link.click();
-      });
-    }
+  Packer.toBlob(doc).then((blob) => {
+    const link = document.createElement("a");
+    link.href = URL.createObjectURL(blob);
+    link.download = "ActivityPlan.docx";
+    link.click();
+  });
+}
+
   </script>
 </body>
 </html>
