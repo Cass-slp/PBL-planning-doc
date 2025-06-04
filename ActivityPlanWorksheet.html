@@ -66,6 +66,18 @@
   <button onclick="downloadWord()">Download as Word Document</button>
 
   <script>
+    function togglePeerOther(index) {
+      const checkbox = document.getElementById(`peerOtherCheck${index}`);
+      const textbox = document.getElementById(`peerOtherText${index}`);
+      textbox.style.display = checkbox.checked ? "block" : "none";
+    }
+    
+    function handleCommSystemOther(selectElement, activityIndex, selectIndex) {
+      const textbox = document.getElementById(`commOther${activityIndex}_${selectIndex}`);
+      textbox.style.display = selectElement.value === "Other" ? "block" : "none";
+    }
+
+    
     // (1) Your activityOptions stays the same
     const activityOptions = {
       "ADST": [
@@ -195,6 +207,35 @@
 
           <label for="vocabulary${index}">Vocabulary</label>
           <textarea id="vocabulary${index}" placeholder="Key vocabulary..."></textarea>
+          
+          <label>Student Communication System</label>
+          <div id="commSystemContainer${index}">
+            ${[1, 2, 3].map(j => `
+              <select onchange="handleCommSystemOther(this, ${index}, ${j})" id="commSelect${index}_${j}">
+                <option value="">-- Select Option --</option>
+                <option value="Touch Chat">Touch Chat</option>
+                <option value="Eye Gaze System">Eye Gaze System</option>
+                <option value="Single Message Button">Single Message Button</option>
+                <option value="Communication Board">Communication Board</option>
+                <option value="Environmental Board">Environmental Board</option>
+                <option value="GoTalk">GoTalk</option>
+                <option value="E-Tran">E-Tran</option>
+                <option value="Other">Other</option>
+              </select>
+              <input type="text" id="commOther${index}_${j}" style="display:none; margin-bottom: 1rem;" placeholder="Please specify..." />
+            `).join("")}
+          </div>
+
+            <label>Involving Peers</label>
+            <div>
+              <label><input type="checkbox" name="peers${index}" value="Classroom"> Classroom</label><br />
+              <label><input type="checkbox" name="peers${index}" value="Hallway"> Hallway</label><br />
+              <label>
+                <input type="checkbox" id="peerOtherCheck${index}" onchange="togglePeerOther(${index})">
+                Other
+              </label>
+              <input type="text" id="peerOtherText${index}" placeholder="Please specify..." style="display:none; margin-top: 0.5rem;" />
+            </div>
 
           <label for="instructions${index}">Instructions</label>
           <textarea id="instructions${index}" placeholder="Describe the activity..."></textarea>
