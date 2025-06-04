@@ -208,23 +208,24 @@
           <label for="vocabulary${index}">Vocabulary</label>
           <textarea id="vocabulary${index}" placeholder="Key vocabulary..."></textarea>
           
-          <label>Student Communication System</label>
-          <div id="commSystemContainer${index}">
-            ${[1, 2, 3].map(j => `
-              <select onchange="handleCommSystemOther(this, ${index}, ${j})" id="commSelect${index}_${j}">
-                <option value="">-- Select Option --</option>
-                <option value="Touch Chat">Touch Chat</option>
-                <option value="Eye Gaze System">Eye Gaze System</option>
-                <option value="Single Message Button">Single Message Button</option>
-                <option value="Communication Board">Communication Board</option>
-                <option value="Environmental Board">Environmental Board</option>
-                <option value="GoTalk">GoTalk</option>
-                <option value="E-Tran">E-Tran</option>
-                <option value="Other">Other</option>
-              </select>
-              <input type="text" id="commOther${index}_${j}" style="display:none; margin-bottom: 1rem;" placeholder="Please specify..." />
-            `).join("")}
-          </div>
+            <label>Student Communication System</label>
+            <div id="commSystemContainer${index}">
+              ${[1, 2, 3].map(j => `
+                <select onchange="handleCommSystemOther(this, ${index}, ${j})" id="commSelect${index}_${j}">
+                  <option value="">-- Select Option --</option>
+                  <option value="Touch Chat">Touch Chat</option>
+                  <option value="Eye Gaze System">Eye Gaze System</option>
+                  <option value="Single Message Button">Single Message Button</option>
+                  <option value="Communication Board">Communication Board</option>
+                  <option value="Environmental Board">Environmental Board</option>
+                  <option value="GoTalk">GoTalk</option>
+                  <option value="E-Tran">E-Tran</option>
+                  <option value="Other">Other</option>
+                </select>
+                <input type="text" id="commOther${index}_${j}" style="display:none; margin-bottom: 1rem;" placeholder="Please specify..." />
+              `).join("")}
+            </div>
+
 
             <label>Involving Peers</label>
             <div>
@@ -279,16 +280,29 @@
 
     // (4) The downloadWord function now works because window.docx is defined
   function downloadWord() {
-  const { Document, Packer, Paragraph, TextRun, Table, TableRow, TableCell, WidthType } = window.docx;
+  const {
+    Document,
+    Packer,
+    Paragraph,
+    TextRun,
+    Table,
+    TableRow,
+    TableCell,
+    WidthType
+  } = window.docx;
 
   const children = [];
 
+  // Title
   children.push(new Paragraph({
-    children: [new TextRun({ text: "Activity Plan Worksheet", bold: true, size: 28 })]
+    children: [
+      new TextRun({ text: "Activity Plan Worksheet", bold: true, size: 28 })
+    ]
   }));
   children.push(new Paragraph(""));
 
-  const subject = document.getElementById("globalSubject").value;
+  // Subject Area
+  const subject = document.getElementById("globalSubject")?.value || "";
   children.push(new Paragraph({
     children: [
       new TextRun({ text: "Subject Area: ", bold: true }),
@@ -297,33 +311,42 @@
   }));
   children.push(new Paragraph(""));
 
+  // Loop through activities
   for (let i = 0; i < 5; i++) {
-    const topic = document.getElementById(`topic${i}`).value;
-    const activity = document.getElementById(`activityName${i}`).value;
-    const materials = document.getElementById(`materials${i}`).value;
-    const vocab = document.getElementById(`vocabulary${i}`).value;
-    const instructions = document.getElementById(`instructions${i}`).value;
-    const variations = document.getElementById(`variations${i}`).value;
+    const topic = document.getElementById(`topic${i}`)?.value || "";
+    const activity = document.getElementById(`activityName${i}`)?.value || "";
+    const materials = document.getElementById(`materials${i}`)?.value || "";
+    const vocab = document.getElementById(`vocabulary${i}`)?.value || "";
+    const instructions = document.getElementById(`instructions${i}`)?.value || "";
+    const variations = document.getElementById(`variations${i}`)?.value || "";
 
+    // ✅ Student Communication System dropdowns
     let commSelections = [];
     for (let j = 1; j <= 3; j++) {
       const sel = document.getElementById(`commSelect${i}_${j}`);
-      const val = sel?.value;
+      if (!sel) continue; // Skip if not found
+      const val = sel.value;
       if (val === "Other") {
-        const other = document.getElementById(`commOther${i}_${j}`)?.value;
-        commSelections.push(`Other: ${other}`);
+        const other = document.getElementById(`commOther${i}_${j}`);
+        if (other && other.value.trim()) {
+          commSelections.push(`Other: ${other.value.trim()}`);
+        }
       } else if (val) {
         commSelections.push(val);
       }
     }
 
+    // ✅ Involving Peers checkboxes + other
     const peerChecks = Array.from(document.querySelectorAll(`input[name="peers${i}"]:checked`)).map(el => el.value);
     const peerOtherChecked = document.getElementById(`peerOtherCheck${i}`)?.checked;
     if (peerOtherChecked) {
       const otherText = document.getElementById(`peerOtherText${i}`)?.value;
-      if (otherText) peerChecks.push(`Other: ${otherText}`);
+      if (otherText && otherText.trim()) {
+        peerChecks.push(`Other: ${otherText.trim()}`);
+      }
     }
 
+    // Activity heading
     children.push(new Paragraph({
       spacing: { before: 300, after: 150 },
       children: [new TextRun({ text: `Activity ${i + 1}`, bold: true, size: 24 })]
@@ -343,10 +366,11 @@
       ]
     }));
 
-    // Table with 2x2 structure
+    // ✅ 2x2 Table: Materials | Vocabulary, Comm System | Involving Peers
     const table = new Table({
       width: { size: 100, type: WidthType.PERCENTAGE },
       rows: [
+        // Row 1: headers
         new TableRow({
           children: [
             new TableCell({
@@ -357,12 +381,14 @@
             })
           ]
         }),
+        // Row 2: values
         new TableRow({
           children: [
             new TableCell({ children: [new Paragraph(materials || " ")] }),
             new TableCell({ children: [new Paragraph(vocab || " ")] })
           ]
         }),
+        // Row 3: headers
         new TableRow({
           children: [
             new TableCell({
@@ -373,6 +399,7 @@
             })
           ]
         }),
+        // Row 4: values
         new TableRow({
           children: [
             new TableCell({
@@ -386,19 +413,21 @@
                 : [new Paragraph(" ")]
             })
           ]
-        }),
+        })
       ]
     });
 
     children.push(table);
     children.push(new Paragraph(""));
 
+    // Instructions
     children.push(new Paragraph({
       spacing: { before: 200, after: 100 },
       children: [new TextRun({ text: "Instructions", bold: true })]
     }));
     children.push(new Paragraph(instructions || " "));
 
+    // Variations
     children.push(new Paragraph({
       spacing: { before: 200, after: 100 },
       children: [new TextRun({ text: "Variations", bold: true })]
@@ -408,17 +437,19 @@
     children.push(new Paragraph(""));
   }
 
+  // ✅ Create the document now with children already defined
   const doc = new Document({
     sections: [{
       properties: {
         page: {
-          margin: { top: 720, bottom: 720, left: 720, right: 720 },
-        },
+          margin: { top: 720, bottom: 720, left: 720, right: 720 }
+        }
       },
-      children,
+      children
     }]
   });
 
+  // Trigger the download
   Packer.toBlob(doc).then(blob => {
     const link = document.createElement("a");
     link.href = URL.createObjectURL(blob);
@@ -426,6 +457,7 @@
     link.click();
   });
 }
+
 
 
 
