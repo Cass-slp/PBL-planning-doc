@@ -281,18 +281,7 @@
   function downloadWord() {
   const { Document, Packer, Paragraph, TextRun, Table, TableRow, TableCell, WidthType } = window.docx;
 
-  const doc = new Document({
-    sections: [{
-      properties: {
-        page: {
-          margin: { top: 720, bottom: 720, left: 720, right: 720 },
-        },
-      },
-      children: [],
-    }]
-  });
-
-  const children = doc.sections[0].children;
+  const children = [];
 
   children.push(new Paragraph({
     children: [new TextRun({ text: "Activity Plan Worksheet", bold: true, size: 28 })]
@@ -316,33 +305,28 @@
     const instructions = document.getElementById(`instructions${i}`).value;
     const variations = document.getElementById(`variations${i}`).value;
 
-    // Student Communication System: collect selected options
     let commSelections = [];
     for (let j = 1; j <= 3; j++) {
       const sel = document.getElementById(`commSelect${i}_${j}`);
-      const val = sel.value;
+      const val = sel?.value;
       if (val === "Other") {
-        const other = document.getElementById(`commOther${i}_${j}`).value;
+        const other = document.getElementById(`commOther${i}_${j}`)?.value;
         commSelections.push(`Other: ${other}`);
       } else if (val) {
         commSelections.push(val);
       }
     }
 
-    // Involving Peers: collect checked checkboxes + other text
     const peerChecks = Array.from(document.querySelectorAll(`input[name="peers${i}"]:checked`)).map(el => el.value);
-    const peerOtherChecked = document.getElementById(`peerOtherCheck${i}`).checked;
+    const peerOtherChecked = document.getElementById(`peerOtherCheck${i}`)?.checked;
     if (peerOtherChecked) {
-      const otherText = document.getElementById(`peerOtherText${i}`).value;
+      const otherText = document.getElementById(`peerOtherText${i}`)?.value;
       if (otherText) peerChecks.push(`Other: ${otherText}`);
     }
 
-    // Activity Heading
     children.push(new Paragraph({
       spacing: { before: 300, after: 150 },
-      children: [
-        new TextRun({ text: `Activity ${i + 1}`, bold: true, size: 24 })
-      ]
+      children: [new TextRun({ text: `Activity ${i + 1}`, bold: true, size: 24 })]
     }));
 
     children.push(new Paragraph({
@@ -359,12 +343,9 @@
       ]
     }));
 
-    // 2×2 Table: Materials, Vocabulary, Communication, Peers
+    // Table with 2x2 structure
     const table = new Table({
-      width: {
-        size: 100,
-        type: WidthType.PERCENTAGE,
-      },
+      width: { size: 100, type: WidthType.PERCENTAGE },
       rows: [
         new TableRow({
           children: [
@@ -412,26 +393,31 @@
     children.push(table);
     children.push(new Paragraph(""));
 
-    // Instructions
     children.push(new Paragraph({
       spacing: { before: 200, after: 100 },
-      children: [
-        new TextRun({ text: "Instructions", bold: true })
-      ]
+      children: [new TextRun({ text: "Instructions", bold: true })]
     }));
     children.push(new Paragraph(instructions || " "));
 
-    // Variations
     children.push(new Paragraph({
       spacing: { before: 200, after: 100 },
-      children: [
-        new TextRun({ text: "Variations", bold: true })
-      ]
+      children: [new TextRun({ text: "Variations", bold: true })]
     }));
     children.push(new Paragraph(variations || " "));
 
-    children.push(new Paragraph("")); // space before next activity
+    children.push(new Paragraph(""));
   }
+
+  const doc = new Document({
+    sections: [{
+      properties: {
+        page: {
+          margin: { top: 720, bottom: 720, left: 720, right: 720 },
+        },
+      },
+      children,
+    }]
+  });
 
   Packer.toBlob(doc).then(blob => {
     const link = document.createElement("a");
@@ -440,6 +426,7 @@
     link.click();
   });
 }
+
 
 
   </script>
