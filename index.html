@@ -1,571 +1,65 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <title>Activity Plan Worksheet</title>
-
-  <!-- Make sure we load the correct UMD bundle so window.docx exists -->
-  <script src="https://unpkg.com/docx@8.2.2/build/index.umd.js"></script>
-
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Homepage</title>
   <style>
     body {
-      font-family: Arial, sans-serif;
-      margin: 2rem;
-      background-color: #f9f9f9;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: linear-gradient(135deg, #e0f7fa, #80deea);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      height: 100vh;
+      margin: 0;
     }
+
     h1 {
-      font-size: 28px;
-      margin-bottom: 1rem;
+      margin-bottom: 40px;
+      color: #004d40;
     }
-    h2 {
-      background-color: #e0e0e0;
-      padding: 0.5rem;
-      border-radius: 8px;
-      margin-top: 2rem;
+
+    .button-container {
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
     }
-    .activity-section {
-      border: 1px solid #ccc;
-      padding: 1rem;
-      border-radius: 10px;
-      background-color: white;
-      margin-bottom: 2rem;
-    }
-    label {
-      display: block;
-      margin: 0.5rem 0 0.2rem;
-      font-weight: bold;
-    }
-    input[type="text"], select, textarea {
-      width: 100%;
-      padding: 0.4rem;
-      border: 1px solid #ccc;
-      border-radius: 8px;
-      box-sizing: border-box;
-      margin-bottom: 1rem;
-      font-size: 14px;
-    }
-    textarea {
-      height: 3rem;
-    }
-    button {
-      padding: 0.6rem 1.2rem;
-      font-size: 1rem;
-      background-color: #4CAF50;
+
+    .button {
+      padding: 15px 30px;
+      background-color: #00796b;
       color: white;
       border: none;
-      border-radius: 6px;
+      border-radius: 12px;
+      font-size: 18px;
       cursor: pointer;
-      margin-top: 1rem;
+      transition: background-color 0.3s ease, transform 0.2s ease;
+      text-align: center;
+      text-decoration: none;
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    }
+
+    .button:hover {
+      background-color: #004d40;
+      transform: scale(1.05);
+    }
+
+    @media (max-width: 600px) {
+      .button {
+        width: 80vw;
+      }
     }
   </style>
 </head>
 <body>
-  <h1>Activity Plan Worksheet</h1>
-
-  <label for="globalSubject">Subject Area (applies to all activities)</label>
-  <select id="globalSubject">
-    <option value="">-- Select Subject --</option>
-  </select>
-
-  <div id="formContainer"></div>
-  <button onclick="downloadWord()">Download as Word Document</button>
-
-  <script>
-    // 1) The mapping of each Subject → possible Topic Areas
-    const activityOptions = {
-      "ADST": [
-        "Applied Design Process",
-        "Computational Thinking and Digital Literacy",
-        "Media Arts/Digital Creation",
-        "Food Studies",
-        "Textiles",
-        "Woodwork/Construction/Maker Activities",
-        "Robotics and Engineering",
-        "Entrepreneurship"
-      ],
-      "Language Arts": [
-        "Phonemic Awareness and Phonics",
-        "Reading Aloud",
-        "Retelling Stories",
-        "Making Predictions",
-        "Asking Questions",
-        "Summarizing",
-        "Creative Writing",
-        "Personal Writing",
-        "Informational Writing",
-        "Opinion/Argument Writing",
-        "Writing Process",
-        "Oral Storytelling",
-        "Sharing Ideas",
-        "Presentations",
-        "Listening Comprehension",
-        "Following Directions",
-        "High-Frequency Words and Sight Words",
-        "Spelling Patterns and Rules",
-        "Word Families and Rhyming Words",
-        "Prefixes, Suffixes, Root Words",
-        "Parts of Speech (nouns, verbs, adjectives)",
-        "Sentence Structure",
-        "Understanding and Creating Media Texts",
-        "Analyzing Messages and Audience",
-        "Evaluating Sources and Information"
-      ],
-      "Mathematics": [
-        "Counting and Number Recognition",
-        "Addition, Subtraction, Multiplication, Division",
-        "Identifying and Creating Patterns",
-        "Understanding Relationships and Functions",
-        "Measuring and Understanding Length/Width/Height (standard and non standard units)",
-        "Measuring and Understanding Time (clocks, calendars, elapsed time)",
-        "Measuring and Understanding Temperature",
-        "Measuring and Understanding Weight and Mass",
-        "Measuring and Understanding Volume and Capacity",
-        "2D and 3D Shapes",
-        "Sorting and Classifying",
-        "Collecting and Organizing Data",
-        "Real World Math Applications",
-        "Logical Reasoning",
-        "Understanding Money",
-        "Earning, Saving, Spending",
-        "Making Change",
-        "Budgeting Basics"
-      ],
-      "Physical Health Education": [
-        "Locomotor Skills (walking, running, skipping, leaping, sliding)",
-        "Non-Locomotor Skills (balancing, twisting, stretching, bending, swaying)",
-        "Manipulative Skills (catching, kicking, rolling)",
-        "Games and Cooperative Play",
-        "Rhythm and Dance",
-        "Fitness and Health",
-        "Outdoor and Adventure",
-        "Safety and Personal Responsibility"
-      ],
-      "Science": [
-        "Plants and Animals",
-        "Human Body",
-        "Ecosystems and Environments",
-        "Matter",
-        "Forces and Motion",
-        "Sound, Light, and Heat",
-        "Weather and Seasons",
-        "Rocks, Soil and Landforms",
-        "Water Cycle",
-        "Recycling and Waste",
-        "Space",
-        "Local Ecosystems",
-        "Asking Questions and Making Predictions",
-        "Designing and Conducting Experiments",
-        "Making Observations and Recording Data",
-        "Analyzing and Drawing Conclusions",
-        "Design and Build Challenges",
-        "Using Tools and Materials Safely"
-      ],
-      "Social Studies": [
-        "Identity, Culture and Community",
-        "Governance and Decision Making",
-        "Geography and Environment",
-        "Time Continuity and Change",
-        "Economy and Resources",
-        "Global and Cultural Connections",
-        "Indigenous Perspectives and Knowledge"
-      ],
-      "Life Skills": [
-        "Personal Care and Hygiene",
-        "Social and Communication Skills",
-        "Self Regulation and Coping Skills",
-        "Home and Daily Living Skills",
-        "Safety and Community Awareness",
-        "Time and Money Skills",
-        "Organization and Responsibility",
-        "Healthy Choices and Nutrition"
-      ]
-    };
-
-    // 2) Build one “Activity” section in the browser form
-    function createActivitySection(index) {
-      return `
-        <div class="activity-section">
-          <h2>Activity ${index + 1}</h2>
-
-          <label for="topic${index}">Topic Area</label>
-          <select id="topic${index}">
-            <option value="">-- Select Topic --</option>
-          </select>
-
-          <label for="activityName${index}">Activity Name</label>
-          <input type="text" id="activityName${index}" placeholder="Click or tap here to enter text.">
-
-          <label for="materials${index}">Materials/Resources Needed:</label>
-          <textarea id="materials${index}" placeholder="Click or tap here to enter text."></textarea>
-
-          <label for="vocabulary${index}">Vocabulary to model:</label>
-          <textarea id="vocabulary${index}" placeholder="Click or tap here to enter text."></textarea>
-
-          <label for="commSystems${index}">Student Communication Systems:</label>
-          <textarea id="commSystems${index}" placeholder="(Choose an item.)&#10;(Choose an item.)&#10;(Choose an item.)&#10;Other: Click or tap here to enter text." rows="3"></textarea>
-
-          <label for="peers${index}">Involving peers:</label>
-          <textarea id="peers${index}" placeholder="Location:&#10;☐ Classroom&#10;☐ Hallway&#10;☐ Other: Click or tap here to enter text." rows="4"></textarea>
-
-          <label for="studentsAsk${index}">Students to ask:</label>
-          <input type="text" id="studentsAsk${index}" placeholder="Click or tap here to enter text.">
-
-          <label for="instructions${index}">Instructions</label>
-          <textarea id="instructions${index}" placeholder="Click or tap here to enter text." rows="3"></textarea>
-
-          <label for="variations${index}">Variations</label>
-          <textarea id="variations${index}" placeholder="Click or tap here to enter text." rows="3"></textarea>
-        </div>
-      `;
-    }
-
-    // 3) When the “Subject Area” changes, populate each Activity’s “Topic” dropdown
-    function updateAllTopics() {
-      const subject = document.getElementById("globalSubject").value;
-      for (let i = 0; i < 5; i++) {
-        const topicSelect = document.getElementById(`topic${i}`);
-        topicSelect.innerHTML = '<option value="">-- Select Topic --</option>';
-        if (activityOptions[subject]) {
-          activityOptions[subject].forEach(topic => {
-            const opt = document.createElement("option");
-            opt.value = topic;
-            opt.textContent = topic;
-            topicSelect.appendChild(opt);
-          });
-        }
-      }
-    }
-
-    // 4) Inject the “Subject” dropdown and all five Activity sections into the page
-    const globalSubject = document.getElementById("globalSubject");
-    Object.keys(activityOptions).forEach(subject => {
-      const opt = document.createElement("option");
-      opt.value = subject;
-      opt.textContent = subject;
-      globalSubject.appendChild(opt);
-    });
-    globalSubject.addEventListener("change", updateAllTopics);
-
-    const container = document.getElementById("formContainer");
-    for (let i = 0; i < 5; i++) {
-      container.innerHTML += createActivitySection(i);
-    }
-
-    // 5) This function builds a .docx with *exactly* the same 3-column tables
-    //    and placeholders as your “Activity Plan Worksheet 1.docx” template.
-    function downloadWord() {
-      const { Document, Packer, Paragraph, TextRun, Table, TableRow, TableCell, WidthType, VerticalAlign, AlignmentType } = window.docx;
-
-      const doc = new Document({
-        sections: [
-          {
-            properties: {
-              page: {
-                margin: { top: 1000, right: 1000, bottom: 1000, left: 1000 }
-              }
-            },
-            children: []
-          }
-        ]
-      });
-
-      const rootChildren = doc.sections[0].children;
-
-      // 5.a) Add the Title “Activity Plan” in Heading2 style (size 32, bold, centered)
-      const title = new Paragraph({
-        children: [ new TextRun({ text: "Activity Plan", bold: true, size: 32 }) ],
-        alignment: AlignmentType.CENTER
-      });
-      rootChildren.push(title);
-      rootChildren.push(new Paragraph("")); // one blank line
-
-      // 5.b) For each of the 5 activities, create a 9×3 table
-      for (let i = 0; i < 5; i++) {
-        const activityIndex = i + 1;
-        const topicValue = document.getElementById(`topic${i}`).value.trim();
-        const activityNameValue = document.getElementById(`activityName${i}`).value.trim();
-        const materialsValue = document.getElementById(`materials${i}`).value.trim();
-        const vocabularyValue = document.getElementById(`vocabulary${i}`).value.trim();
-        const commSystemsValue = document.getElementById(`commSystems${i}`).value.trim();
-        const peersValue = document.getElementById(`peers${i}`).value.trim();
-        const studentsAskValue = document.getElementById(`studentsAsk${i}`).value.trim();
-        const instructionsValue = document.getElementById(`instructions${i}`).value.trim();
-        const variationsValue = document.getElementById(`variations${i}`).value.trim();
-
-        // Create a 9-row, 3-column table
-        const table = doc.createTable(9, 3);
-        table.setWidth(WidthType.DXA, 9072); // total page width minus 1" margins left/right
-
-        // Helper to center text vertically inside each cell
-        function setAllCellVerticalAlign(row, align) {
-          row.cells.forEach(cell => {
-            cell.properties.setVerticalAlign(VerticalAlign.CENTER);
-          });
-        }
-
-        // Row 0: “Activity X” in bold, size 28, centered horizontally & vertically
-        const row0 = table.getRow(0);
-        setAllCellVerticalAlign(row0, VerticalAlign.CENTER);
-        row0.cells.forEach(cell => {
-          cell.clear(); // remove any default empty paragraph
-          cell.addParagraph(
-            new Paragraph({
-              children: [ new TextRun({ text: `Activity ${activityIndex}`, bold: true, size: 28 }) ],
-              alignment: AlignmentType.CENTER
-            })
-          );
-        });
-
-        // Row 1: “Topic Area: [user topic]”
-        const row1 = table.getRow(1);
-        setAllCellVerticalAlign(row1, VerticalAlign.CENTER);
-        row1.cells.forEach(cell => {
-          cell.clear();
-          cell.addParagraph(
-            new Paragraph({
-              children: [
-                new TextRun({ text: "Topic Area: ", bold: true }),
-                new TextRun(topicValue || "")
-              ]
-            })
-          );
-        });
-
-        // Row 2: “Activity Name: [user name]”
-        const row2 = table.getRow(2);
-        setAllCellVerticalAlign(row2, VerticalAlign.CENTER);
-        row2.cells.forEach(cell => {
-          cell.clear();
-          cell.addParagraph(
-            new Paragraph({
-              children: [
-                new TextRun({ text: "Activity Name: ", bold: true }),
-                new TextRun(activityNameValue || "")
-              ]
-            })
-          );
-        });
-
-        // Row 3: “Considerations” (bold, centered)
-        const row3 = table.getRow(3);
-        setAllCellVerticalAlign(row3, VerticalAlign.CENTER);
-        row3.cells.forEach(cell => {
-          cell.clear();
-          cell.addParagraph(
-            new Paragraph({
-              children: [ new TextRun({ text: "Considerations", bold: true, size: 24 }) ],
-              alignment: AlignmentType.CENTER
-            })
-          );
-        });
-
-        // Row 4:
-        //   - col0 & col1: “Materials/Resources Needed:”
-        //   - col2: “Vocabulary to model:”
-        const row4 = table.getRow(4);
-        setAllCellVerticalAlign(row4, VerticalAlign.TOP);
-
-        // col0
-        row4.cells[0].clear();
-        row4.cells[0].addParagraph(
-          new Paragraph({ children: [ new TextRun({ text: "Materials/Resources Needed:", bold: true }) ] })
-        );
-        if (materialsValue) {
-          row4.cells[0].addParagraph(new Paragraph(materialsValue));
-        } else {
-          // leave ~3 blank lines for handwriting
-          row4.cells[0].addParagraph(new Paragraph(""));
-          row4.cells[0].addParagraph(new Paragraph(""));
-          row4.cells[0].addParagraph(new Paragraph(""));
-        }
-
-        // col1 (identical to col0’s label, no user text here)
-        row4.cells[1].clear();
-        row4.cells[1].addParagraph(
-          new Paragraph({ children: [ new TextRun({ text: "Materials/Resources Needed:", bold: true }) ] })
-        );
-        // no user text in this column—just blank
-        row4.cells[1].addParagraph(new Paragraph(""));
-        row4.cells[1].addParagraph(new Paragraph(""));
-        row4.cells[1].addParagraph(new Paragraph(""));
-
-        // col2
-        row4.cells[2].clear();
-        row4.cells[2].addParagraph(
-          new Paragraph({ children: [ new TextRun({ text: "Vocabulary to model:", bold: true }) ] })
-        );
-        if (vocabularyValue) {
-          row4.cells[2].addParagraph(new Paragraph(vocabularyValue));
-        } else {
-          row4.cells[2].addParagraph(new Paragraph(""));
-          row4.cells[2].addParagraph(new Paragraph(""));
-          row4.cells[2].addParagraph(new Paragraph(""));
-        }
-
-        // Row 5:
-        //   - col0 & col1: “Student Communication Systems:” + “Other:”
-        //   - col2: “Involving peers:” + checkboxes + “Students to ask:”
-        const row5 = table.getRow(5);
-        setAllCellVerticalAlign(row5, VerticalAlign.TOP);
-
-        // col0
-        row5.cells[0].clear();
-        row5.cells[0].addParagraph(
-          new Paragraph({ children: [ new TextRun({ text: "Student Communication Systems:", bold: true }) ] })
-        );
-        row5.cells[0].addParagraph(new Paragraph({ children: [ new TextRun({ text: "Other:", bold: true }) ] }));
-        if (commSystemsValue) {
-          // if user provided text, put it here
-          commSystemsValue.split("\n").forEach(line => {
-            row5.cells[0].addParagraph(new Paragraph(line));
-          });
-        } else {
-          // leave a couple blank lines
-          row5.cells[0].addParagraph(new Paragraph(""));
-          row5.cells[0].addParagraph(new Paragraph(""));
-        }
-
-        // col1 (same as col0)
-        row5.cells[1].clear();
-        row5.cells[1].addParagraph(
-          new Paragraph({ children: [ new TextRun({ text: "Student Communication Systems:", bold: true }) ] })
-        );
-        row5.cells[1].addParagraph(new Paragraph({ children: [ new TextRun({ text: "Other:", bold: true }) ] }));
-        row5.cells[1].addParagraph(new Paragraph(""));
-        row5.cells[1].addParagraph(new Paragraph(""));
-
-        // col2
-        row5.cells[2].clear();
-        // “Involving peers:” line
-        row5.cells[2].addParagraph(
-          new Paragraph({ children: [ new TextRun({ text: "Involving peers:", bold: true }) ] })
-        );
-        // “Location:” line with checkboxes
-        const locationPara = new Paragraph();
-        locationPara.addRun(new TextRun("Location:"));
-        row5.cells[2].addParagraph(locationPara);
-
-        // ☐ Classroom
-        const classroomPara = new Paragraph();
-        classroomPara.addRun(new TextRun("\u2610 Classroom")); // Unicode ballot box
-        row5.cells[2].addParagraph(classroomPara);
-
-        // ☐ Hallway
-        const hallwayPara = new Paragraph();
-        hallwayPara.addRun(new TextRun("\u2610 Hallway"));
-        row5.cells[2].addParagraph(hallwayPara);
-
-        // ☐ Other:
-        const otherPara = new Paragraph();
-        otherPara.addRun(new TextRun("\u2610 Other:"));
-        row5.cells[2].addParagraph(otherPara);
-
-        // blank line
-        row5.cells[2].addParagraph(new Paragraph(""));
-
-        // “Students to ask:”
-        const askPara = new Paragraph();
-        askPara.addRun(new TextRun({ text: "Students to ask:", bold: true }));
-        row5.cells[2].addParagraph(askPara);
-        if (studentsAskValue) {
-          row5.cells[2].addParagraph(new Paragraph(studentsAskValue));
-        } else {
-          row5.cells[2].addParagraph(new Paragraph(""));
-        }
-
-        // Row 6: “Activity Information” (centered, bold, size 24)
-        const row6 = table.getRow(6);
-        setAllCellVerticalAlign(row6, VerticalAlign.CENTER);
-        row6.cells.forEach(cell => {
-          cell.clear();
-          cell.addParagraph(
-            new Paragraph({
-              children: [ new TextRun({ text: "Activity Information", bold: true, size: 24 }) ],
-              alignment: AlignmentType.CENTER
-            })
-          );
-        });
-
-        // Row 7:
-        //   - col0: “Instructions” + blank lines / user text
-        //   - col1 & col2: just blank lines
-        const row7 = table.getRow(7);
-        setAllCellVerticalAlign(row7, VerticalAlign.TOP);
-
-        // col0
-        row7.cells[0].clear();
-        row7.cells[0].addParagraph(
-          new Paragraph({ children: [ new TextRun({ text: "Instructions", bold: true }) ] })
-        );
-        if (instructionsValue) {
-          instructionsValue.split("\n").forEach(line => {
-            row7.cells[0].addParagraph(new Paragraph(line));
-          });
-        } else {
-          row7.cells[0].addParagraph(new Paragraph(""));
-          row7.cells[0].addParagraph(new Paragraph(""));
-          row7.cells[0].addParagraph(new Paragraph(""));
-        }
-
-        // col1 (blank)
-        row7.cells[1].clear();
-        row7.cells[1].addParagraph(new Paragraph(""));
-        row7.cells[1].addParagraph(new Paragraph(""));
-        row7.cells[1].addParagraph(new Paragraph(""));
-
-        // col2 (blank)
-        row7.cells[2].clear();
-        row7.cells[2].addParagraph(new Paragraph(""));
-        row7.cells[2].addParagraph(new Paragraph(""));
-        row7.cells[2].addParagraph(new Paragraph(""));
-
-        // Row 8:
-        //   - col0: “Variations” + blank / user text
-        //   - col1 & col2: just blank
-        const row8 = table.getRow(8);
-        setAllCellVerticalAlign(row8, VerticalAlign.TOP);
-
-        // col0
-        row8.cells[0].clear();
-        row8.cells[0].addParagraph(
-          new Paragraph({ children: [ new TextRun({ text: "Variations", bold: true }) ] })
-        );
-        if (variationsValue) {
-          variationsValue.split("\n").forEach(line => {
-            row8.cells[0].addParagraph(new Paragraph(line));
-          });
-        } else {
-          row8.cells[0].addParagraph(new Paragraph(""));
-          row8.cells[0].addParagraph(new Paragraph(""));
-          row8.cells[0].addParagraph(new Paragraph(""));
-        }
-
-        // col1 (blank)
-        row8.cells[1].clear();
-        row8.cells[1].addParagraph(new Paragraph(""));
-        row8.cells[1].addParagraph(new Paragraph(""));
-        row8.cells[1].addParagraph(new Paragraph(""));
-
-        // col2 (blank)
-        row8.cells[2].clear();
-        row8.cells[2].addParagraph(new Paragraph(""));
-        row8.cells[2].addParagraph(new Paragraph(""));
-        row8.cells[2].addParagraph(new Paragraph(""));
-
-        // After each table, insert two blank paragraphs as spacing
-        rootChildren.push(table);
-        rootChildren.push(new Paragraph(""));
-        rootChildren.push(new Paragraph(""));
-      }
-
-      // Finally, bundle the document and trigger download
-      Packer.toBlob(doc).then(blob => {
-        const link = document.createElement("a");
-        link.href = URL.createObjectURL(blob);
-        link.download = "ActivityPlan.docx";
-        link.click();
-      });
-    }
-  </script>
+  <h1>Welcome to My Homepage</h1>
+  <div class="button-container">
+    <a href="ActivityPlanWorksheet.html" class="button" target="_blank">APW</a>
+    <a href="https://www.wikipedia.org" class="button" target="_blank">Wikipedia</a>
+    <a href="https://www.youtube.com" class="button" target="_blank">YouTube</a>
+    <a href="https://www.reddit.com" class="button" target="_blank">Reddit</a>
+  </div>
 </body>
 </html>
