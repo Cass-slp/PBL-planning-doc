@@ -279,29 +279,34 @@
 
     // (4) The downloadWord function now works because window.docx is defined
   function downloadWord() {
-  const { Document, Packer, Paragraph, TextRun, HeadingLevel } = window.docx;
+  const { Document, Packer, Paragraph, TextRun, Table, TableRow, TableCell, WidthType } = window.docx;
 
-  const children = [];
+  const doc = new Document({
+    sections: [{
+      properties: {
+        page: {
+          margin: { top: 720, bottom: 720, left: 720, right: 720 },
+        },
+      },
+      children: [],
+    }]
+  });
 
-  // Title
-  children.push(
-    new Paragraph({
-      heading: HeadingLevel.HEADING_1,
-      children: [new TextRun({ text: "Activity Plan Worksheet", bold: true })],
-    })
-  );
+  const children = doc.sections[0].children;
 
-  // Subject Area
+  children.push(new Paragraph({
+    children: [new TextRun({ text: "Activity Plan Worksheet", bold: true, size: 28 })]
+  }));
+  children.push(new Paragraph(""));
+
   const subject = document.getElementById("globalSubject").value;
-  children.push(
-    new Paragraph({
-      spacing: { after: 200 },
-      children: [
-        new TextRun({ text: "Subject Area: ", bold: true }),
-        new TextRun(subject),
-      ],
-    })
-  );
+  children.push(new Paragraph({
+    children: [
+      new TextRun({ text: "Subject Area: ", bold: true }),
+      new TextRun(subject)
+    ]
+  }));
+  children.push(new Paragraph(""));
 
   for (let i = 0; i < 5; i++) {
     const topic = document.getElementById(`topic${i}`).value;
@@ -311,58 +316,131 @@
     const instructions = document.getElementById(`instructions${i}`).value;
     const variations = document.getElementById(`variations${i}`).value;
 
-    // Activity heading
-    children.push(
-      new Paragraph({
-        spacing: { before: 400, after: 200 },
-        heading: HeadingLevel.HEADING_2,
-        children: [
-          new TextRun({ text: `Activity ${i + 1}`, bold: true }),
-        ],
-      })
-    );
+    // Student Communication System: collect selected options
+    let commSelections = [];
+    for (let j = 1; j <= 3; j++) {
+      const sel = document.getElementById(`commSelect${i}_${j}`);
+      const val = sel.value;
+      if (val === "Other") {
+        const other = document.getElementById(`commOther${i}_${j}`).value;
+        commSelections.push(`Other: ${other}`);
+      } else if (val) {
+        commSelections.push(val);
+      }
+    }
 
-    // Each field styled with label and value
-    const addSection = (label, value) => {
-      children.push(
-        new Paragraph({
-          spacing: { after: 100 },
+    // Involving Peers: collect checked checkboxes + other text
+    const peerChecks = Array.from(document.querySelectorAll(`input[name="peers${i}"]:checked`)).map(el => el.value);
+    const peerOtherChecked = document.getElementById(`peerOtherCheck${i}`).checked;
+    if (peerOtherChecked) {
+      const otherText = document.getElementById(`peerOtherText${i}`).value;
+      if (otherText) peerChecks.push(`Other: ${otherText}`);
+    }
+
+    // Activity Heading
+    children.push(new Paragraph({
+      spacing: { before: 300, after: 150 },
+      children: [
+        new TextRun({ text: `Activity ${i + 1}`, bold: true, size: 24 })
+      ]
+    }));
+
+    children.push(new Paragraph({
+      children: [
+        new TextRun({ text: "Topic Area: ", bold: true }),
+        new TextRun(topic)
+      ]
+    }));
+
+    children.push(new Paragraph({
+      children: [
+        new TextRun({ text: "Activity Name: ", bold: true }),
+        new TextRun(activity)
+      ]
+    }));
+
+    // 2×2 Table: Materials, Vocabulary, Communication, Peers
+    const table = new Table({
+      width: {
+        size: 100,
+        type: WidthType.PERCENTAGE,
+      },
+      rows: [
+        new TableRow({
           children: [
-            new TextRun({ text: `${label}: `, bold: true }),
-            new TextRun(value || " "),
-          ],
-        })
-      );
-    };
+            new TableCell({
+              children: [new Paragraph({ children: [new TextRun({ text: "Materials/Resources", bold: true })] })]
+            }),
+            new TableCell({
+              children: [new Paragraph({ children: [new TextRun({ text: "Vocabulary", bold: true })] })]
+            })
+          ]
+        }),
+        new TableRow({
+          children: [
+            new TableCell({ children: [new Paragraph(materials || " ")] }),
+            new TableCell({ children: [new Paragraph(vocab || " ")] })
+          ]
+        }),
+        new TableRow({
+          children: [
+            new TableCell({
+              children: [new Paragraph({ children: [new TextRun({ text: "Student Communication System", bold: true })] })]
+            }),
+            new TableCell({
+              children: [new Paragraph({ children: [new TextRun({ text: "Involving Peers", bold: true })] })]
+            })
+          ]
+        }),
+        new TableRow({
+          children: [
+            new TableCell({
+              children: commSelections.length
+                ? commSelections.map(text => new Paragraph(text))
+                : [new Paragraph(" ")]
+            }),
+            new TableCell({
+              children: peerChecks.length
+                ? peerChecks.map(text => new Paragraph(text))
+                : [new Paragraph(" ")]
+            })
+          ]
+        }),
+      ]
+    });
 
-    addSection("Topic Area", topic);
-    addSection("Activity Name", activity);
-    addSection("Materials/Resources Needed", materials);
-    addSection("Vocabulary to Model", vocab);
-    addSection("Instructions", instructions);
-    addSection("Variations", variations);
+    children.push(table);
+    children.push(new Paragraph(""));
+
+    // Instructions
+    children.push(new Paragraph({
+      spacing: { before: 200, after: 100 },
+      children: [
+        new TextRun({ text: "Instructions", bold: true })
+      ]
+    }));
+    children.push(new Paragraph(instructions || " "));
+
+    // Variations
+    children.push(new Paragraph({
+      spacing: { before: 200, after: 100 },
+      children: [
+        new TextRun({ text: "Variations", bold: true })
+      ]
+    }));
+    children.push(new Paragraph(variations || " "));
+
+    children.push(new Paragraph("")); // space before next activity
   }
 
-  const doc = new Document({
-    sections: [
-      {
-        properties: {
-          page: {
-            margin: { top: 720, bottom: 720, left: 720, right: 720 }, // 1 inch margins
-          },
-        },
-        children,
-      },
-    ],
-  });
-
-  Packer.toBlob(doc).then((blob) => {
+  Packer.toBlob(doc).then(blob => {
     const link = document.createElement("a");
     link.href = URL.createObjectURL(blob);
     link.download = "ActivityPlan.docx";
     link.click();
   });
 }
+
 
   </script>
 </body>
