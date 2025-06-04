@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <title>Activity Plan Worksheet</title>
-  <script src="https://cdn.jsdelivr.net/npm/docx@8.2.0/build/index.umd.js" defer></script>
+  <script src="https://cdn.jsdelivr.net/npm/docx@8.2.0/build/index.umd.js"></script>
   <style>
     body {
       font-family: Arial, sans-serif;
@@ -62,8 +62,7 @@
   <button onclick="downloadWord()">Download as Word Document</button>
 
   <script>
-window.onload = function () {
-  const activityOptions = {
+    const activityOptions = {
   "ADST": [
     "Applied Design Process",
     "Computational Thinking and Digital Literacy",
@@ -230,7 +229,7 @@ window.onload = function () {
       container.innerHTML += createActivitySection(i);
     }
 
-      function downloadWord() {
+    function downloadWord() {
       const { Document, Packer, Paragraph, TextRun } = window.docx;
 
       const children = [
@@ -266,6 +265,6 @@ window.onload = function () {
         link.click();
       });
     }
-</script>
+  </script>
 </body>
 </html>
